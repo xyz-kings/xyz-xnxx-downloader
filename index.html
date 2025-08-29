@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XNXX Downloader Overpowered</title>
+    <title>XNXX Downloader</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -18,13 +18,20 @@
             background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
             color: #ffffff;
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             overflow-x: hidden;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.8);
             padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            width: 90%;
+            backdrop-filter: blur(10px);
         }
 
         h1 {
@@ -37,17 +44,15 @@
 
         .input-group {
             display: flex;
-            gap: 0;
-            margin-bottom: 2rem;
-            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
         }
 
         input[type="text"] {
-            width: 100%;
-            max-width: 500px;
+            flex: 1;
             padding: 1rem;
             border: none;
-            border-radius: 10px 0 0 10px;
+            border-radius: 10px;
             background: #333;
             color: #fff;
             font-size: 1rem;
@@ -59,10 +64,10 @@
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
-        .search-btn {
-            padding: 1rem 1.5rem;
+        button {
+            padding: 1rem;
             border: none;
-            border-radius: 0 10px 10px 0;
+            border-radius: 10px;
             background: linear-gradient(45deg, #ff4b4b, #ff7878);
             color: #fff;
             font-size: 1rem;
@@ -70,11 +75,12 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
         }
 
-        .search-btn:hover {
-            transform: translateY(-3px);
+        button:hover {
+            transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(255, 75, 75, 0.5);
         }
 
@@ -83,130 +89,29 @@
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
-        .search-results {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
+        #result {
             margin-top: 2rem;
-        }
-
-        .video-item {
+            padding: 1rem;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
-            padding: 1rem;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .video-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(255, 75, 75, 0.3);
-        }
-
-        .video-item img {
-            width: 100%;
-            aspect-ratio: 16/9;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-        }
-
-        .video-item h3 {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .video-item p {
-            font-size: 0.9rem;
-            color: #ccc;
-        }
-
-        .video-details {
             display: none;
-            padding: 1rem;
         }
 
-        .toolbar {
-            display: flex;
-            align-items: center;
+        #result img {
+            max-width: 100%;
+            border-radius: 10px;
             margin-bottom: 1rem;
         }
 
-        .back-btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(45deg, #ff4b4b, #ff7878);
-            color: #fff;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .back-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 75, 75, 0.5);
-        }
-
-        .video-player {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto 1rem;
-        }
-
-        .video-player video {
-            width: 100%;
-            border-radius: 10px;
-            background: #000;
-        }
-
-        .video-controls {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2rem;
-            background: rgba(0, 0, 0, 0.6);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            border-radius: 10px;
-            pointer-events: none;
-        }
-
-        .video-controls.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .control-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            pointer-events: auto;
-        }
-
-        .control-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-
-        .control-btn i {
+        #result h2 {
             font-size: 1.5rem;
-            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        #result p {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: #ccc;
         }
 
         .download-links button {
@@ -215,10 +120,11 @@
             margin: 0.5rem;
             background: linear-gradient(45deg, #ff4b4b, #ff7878);
             color: #fff;
-            border: none;
+            text-decoration: none;
             border-radius: 8px;
-            cursor: pointer;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            cursor: pointer;
         }
 
         .download-links button:hover {
@@ -231,7 +137,7 @@
             text-align: center;
             font-size: 1rem;
             color: #fff;
-            margin: 2rem 0;
+            margin-top: 1rem;
         }
 
         @media (max-width: 600px) {
@@ -241,378 +147,101 @@
 
             .input-group {
                 flex-direction: column;
-                gap: 10px;
             }
 
-            .search-btn {
-                border-radius: 10px;
-            }
-
-            input[type="text"] {
-                border-radius: 10px;
-            }
-
-            .video-player {
-                max-width: 100%;
+            button {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="searchPage">
-            <h1><i class="fa-solid fa-download icon-3d"></i> XNXX Downloader Overpowered</h1>
-            <div class="input-group">
-                <input type="text" id="searchInput" placeholder="Search for videos (e.g., blow job)">
-                <button class="search-btn" id="searchBtn"><i class="fa-solid fa-search icon-3d"></i> Search</button>
-            </div>
-            <div class="loader" id="loader">Loading...</div>
-            <div class="search-results" id="searchResults"></div>
+        <h1><i class="fa-solid fa-download icon-3d"></i> XNXX Downloader</h1>
+        <div class="input-group">
+            <input type="text" id="urlInput" placeholder="Paste XNXX video URL here...">
+            <button id="downloadBtn"><i class="fa-solid fa-cloud-arrow-down icon-3d"></i> Download</button>
         </div>
-        <div class="video-details" id="videoDetails">
-            <div class="toolbar">
-                <button class="back-btn" id="backBtn"><i class="fa-solid fa-arrow-left icon-3d"></i> Back</button>
-            </div>
-            <div class="video-player">
-                <video id="videoPlayer" preload="auto"></video>
-                <div class="video-controls" id="videoControls">
-                    <button class="control-btn" id="rewindBtn"><i class="fa-solid fa-backward"></i></button>
-                    <button class="control-btn" id="playPauseBtn"><i class="fa-solid fa-play"></i></button>
-                    <button class="control-btn" id="forwardBtn"><i class="fa-solid fa-forward"></i></button>
-                </div>
-            </div>
-            <h2 id="videoTitle"></h2>
-            <p id="videoInfo"></p>
+        <div class="loader" id="loader">Loading...</div>
+        <div id="result">
+            <img id="thumbnail" src="" alt="Video Thumbnail">
+            <h2 id="title"></h2>
+            <p id="info"></p>
             <div class="download-links" id="downloadLinks"></div>
         </div>
     </div>
     <script>
-        let searchResultsCache = [];
-        let lastClickTime = 0;
-        const maxRetries = 2;
-
         document.addEventListener('DOMContentLoaded', () => {
-            const searchBtn = document.getElementById('searchBtn');
-            const backBtn = document.getElementById('backBtn');
-            const videoPlayer = document.getElementById('videoPlayer');
-            const videoControls = document.getElementById('videoControls');
-            const playPauseBtn = document.getElementById('playPauseBtn');
-            const rewindBtn = document.getElementById('rewindBtn');
-            const forwardBtn = document.getElementById('forwardBtn');
-
-            searchBtn.addEventListener('click', () => searchVideos(0));
-            backBtn.addEventListener('click', showSearchPage);
-
-            // Custom video controls
-            videoPlayer.addEventListener('click', (e) => {
-                const currentTime = Date.now();
-                const rect = videoPlayer.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-
-                if (currentTime - lastClickTime < 300) {
-                    // Double-click
-                    if (clickX < rect.width / 3) {
-                        videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5);
-                    } else if (clickX > (rect.width * 2) / 3) {
-                        videoPlayer.currentTime = Math.min(videoPlayer.duration || Infinity, videoPlayer.currentTime + 5);
-                    } else {
-                        togglePlayPause();
-                    }
-                } else {
-                    // Single click
-                    videoControls.classList.toggle('show');
-                    setTimeout(() => videoControls.classList.remove('show'), 3000);
-                }
-                lastClickTime = currentTime;
-            });
-
-            playPauseBtn.addEventListener('click', togglePlayPause);
-            rewindBtn.addEventListener('click', () => {
-                videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5);
-            });
-            forwardBtn.addEventListener('click', () => {
-                videoPlayer.currentTime = Math.min(videoPlayer.duration || Infinity, videoPlayer.currentTime + 5);
-            });
-
-            videoPlayer.addEventListener('play', () => {
-                playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            });
-            videoPlayer.addEventListener('pause', () => {
-                playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-            });
-
-            videoPlayer.addEventListener('error', () => {
-                console.error('Video error:', videoPlayer.error);
-                tryFallbackVideo(0);
-            });
-
-            videoPlayer.addEventListener('loadedmetadata', () => {
-                console.log('Video loaded:', videoPlayer.src);
-            });
-
-            function togglePlayPause() {
-                if (videoPlayer.paused) {
-                    videoPlayer.play().catch(err => {
-                        console.error('Play error:', err);
-                        alert('Cannot play video. Try another video or use a VPN.');
-                    });
-                    playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-                } else {
-                    videoPlayer.pause();
-                    playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-                }
-            }
-
-            async function tryFallbackVideo(retryCount) {
-                if (retryCount >= maxRetries) {
-                    alert('Failed to load video after retries. Please try another video.');
-                    showSearchPage();
-                    return;
-                }
-                const currentSrc = videoPlayer.src;
-                if (currentSrc.includes('/proxy/download')) {
-                    const url = new URLSearchParams(currentSrc.split('?')[1]).get('url');
-                    videoPlayer.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-                    videoPlayer.load();
-                    videoPlayer.play().catch(err => {
-                        console.error(`Fallback play error (retry ${retryCount + 1}):`, err);
-                        tryFallbackVideo(retryCount + 1);
-                    });
-                }
-            }
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.addEventListener('click', fetchVideo);
         });
 
-        async function searchVideos(retryCount) {
-            const query = document.getElementById('searchInput').value.trim();
-            const searchResults = document.getElementById('searchResults');
+        async function fetchVideo() {
+            const urlInput = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
             const loader = document.getElementById('loader');
-            if (!query) {
-                alert('Please enter a search query');
+            const thumbnail = document.getElementById('thumbnail');
+            const apiKey = 'xyz-key_1fzgS7F28d';
+            const apiUrl = `https://xyz-rest-api.vercel.app/download/xnxx?apikey=${apiKey}&url=${encodeURIComponent(urlInput)}`;
+
+            if (!urlInput) {
+                alert('Please enter a valid URL');
                 return;
             }
 
             loader.style.display = 'block';
-            searchResults.innerHTML = '';
+            resultDiv.style.display = 'none';
 
             try {
-                const response = await fetch('/api/search', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query })
-                });
-                if (!response.ok) throw new Error(`Search API request failed: ${response.status}`);
+                // Gunakan allorigins.win sebagai proxy server luar untuk API
+                const proxyApiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+                const response = await fetch(proxyApiUrl);
                 const data = await response.json();
-                console.log('Search API response:', data);
-
-                if (data.status && data.result && data.result.length > 0) {
-                    searchResultsCache = data.result;
-                    searchResults.innerHTML = data.result.map(item => {
-                        const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
-                        return `
-                            <div class="video-item" onclick="showVideoDetails('${item.link}', 0)">
-                                <img src="/proxy/image?url=${encodeURIComponent(thumbUrl)}&t=${Date.now()}" alt="${item.title}" onerror="handleImageError(this, '${encodeURIComponent(thumbUrl)}')" onload="if(this.naturalWidth===1) this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
-                                <h3>${item.title}</h3>
-                                <p>${item.info.replace(/\n/g, ' | ')}</p>
-                            </div>
-                        `;
-                    }).join('');
-                } else {
-                    searchResults.innerHTML = '<p>No results found. Try a different query.</p>';
-                }
-            } catch (error) {
-                console.error(`Search error (retry ${retryCount}):`, error);
-                if (retryCount < maxRetries) {
-                    console.log(`Retrying search with fallback (attempt ${retryCount + 1})...`);
-                    tryFallbackSearch(query, retryCount);
-                } else {
-                    alert('Error fetching search results after retries. Please check your connection or try a VPN.');
-                }
-            } finally {
-                loader.style.display = 'none';
-            }
-        }
-
-        async function tryFallbackSearch(query, retryCount) {
-            const loader = document.getElementById('loader');
-            const searchResults = document.getElementById('searchResults');
-            const fallbacks = [
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://xyz-rest-api.vercel.app/search/xnxx?apikey=xyz-key_1fzgS7F28d&q=${encodeURIComponent(query)}`)}`,
-                `https://cors-anywhere.herokuapp.com/https://xyz-rest-api.vercel.app/search/xnxx?apikey=xyz-key_1fzgS7F28d&q=${encodeURIComponent(query)}`
-            ];
-
-            try {
-                const response = await fetch(fallbacks[retryCount % fallbacks.length]);
-                if (!response.ok) throw new Error(`Fallback search API failed: ${response.status}`);
-                const data = await response.json();
-                console.log(`Fallback search API response (retry ${retryCount + 1}):`, data);
-
-                if (data.status && data.result && data.result.length > 0) {
-                    searchResultsCache = data.result;
-                    searchResults.innerHTML = data.result.map(item => {
-                        const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
-                        return `
-                            <div class="video-item" onclick="showVideoDetails('${item.link}', 0)">
-                                <img src="https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&w=250&h=140&fit=cover&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
-                                <h3>${item.title}</h3>
-                                <p>${item.info.replace(/\n/g, ' | ')}</p>
-                            </div>
-                        `;
-                    }).join('');
-                } else {
-                    searchResults.innerHTML = '<p>No results found in fallback. Try a different query.</p>';
-                }
-            } catch (error) {
-                console.error(`Fallback search error (retry ${retryCount + 1}):`, error);
-                if (retryCount + 1 < maxRetries) {
-                    tryFallbackSearch(query, retryCount + 1);
-                } else {
-                    alert('Error fetching search results after all retries. Please try a VPN or different query.');
-                }
-            } finally {
-                loader.style.display = 'none';
-            }
-        }
-
-        function handleImageError(img, thumbUrl) {
-            const fallbacks = [
-                `https://images.weserv.nl/?url=${thumbUrl}&w=250&h=140&fit=cover&t=${Date.now()}`,
-                'https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'
-            ];
-            img.onerror = null;
-            img.src = fallbacks.shift() || fallbacks[0];
-        }
-
-        async function showVideoDetails(videoUrl, retryCount) {
-            const searchPage = document.getElementById('searchPage');
-            const videoDetails = document.getElementById('videoDetails');
-            const videoPlayer = document.getElementById('videoPlayer');
-            const videoTitle = document.getElementById('videoTitle');
-            const videoInfo = document.getElementById('videoInfo');
-            const downloadLinks = document.getElementById('downloadLinks');
-            const loader = document.getElementById('loader');
-
-            loader.style.display = 'block';
-            searchPage.style.display = 'none';
-            videoDetails.style.display = 'block';
-            videoPlayer.src = '';
-
-            try {
-                const response = await fetch('/api/download', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: videoUrl })
-                });
-                if (!response.ok) throw new Error(`Download API request failed: ${response.status}`);
-                const data = await response.json();
-                console.log('Download API response:', data);
+                console.log(data); // Debug respons API
 
                 if (data.status && data.result) {
-                    const { title, info, files } = data.result;
+                    const { title, image, info, files } = data.result;
 
-                    // Set video source with proxy
-                    videoPlayer.src = `/proxy/download?url=${encodeURIComponent(files.high)}`;
-                    videoPlayer.load();
-                    videoPlayer.play().catch(err => {
-                        console.error('Video play error:', err);
-                        tryFallbackVideo(retryCount + 1);
-                    });
+                    // Proxy thumbnail melalui images.weserv.nl (server Belanda)
+                    const proxyImageUrl = `https://images.weserv.nl/?url=${encodeURIComponent(image)}&w=400&h=225&fit=cover&t=${Date.now()}`;
+                    thumbnail.src = proxyImageUrl;
+                    thumbnail.onerror = () => {
+                        // Fallback ke thumbnail lain dari respons API
+                        thumbnail.src = files.thumb69 || files.thumb || 'https://via.placeholder.com/400x225?text=Thumbnail+Not+Available';
+                        thumbnail.alt = 'Thumbnail not available';
+                    };
 
-                    videoTitle.textContent = title;
-                    videoInfo.textContent = info.replace(/\n/g, ' | ');
+                    document.getElementById('title').textContent = title;
+                    document.getElementById('info').textContent = info.replace(/\n/g, ' | ');
 
+                    const downloadLinks = document.getElementById('downloadLinks');
                     downloadLinks.innerHTML = `
-                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.low)}', 'low_quality.mp4', 0)">Low Quality</button>
-                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.high)}', 'high_quality.mp4', 0)">High Quality</button>
-                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8', 0)">HLS Stream</button>
+                        <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.low)}', 'low_quality.mp4')">Low Quality</button>
+                        <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}', 'high_quality.mp4')">High Quality</button>
+                        <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8')">HLS Stream</button>
                     `;
+
+                    resultDiv.style.display = 'block';
                 } else {
-                    alert('Failed to load video data. Please try another video.');
-                    showSearchPage();
+                    alert('Failed to fetch video data. Please check the URL.');
                 }
             } catch (error) {
-                console.error(`Video load error (retry ${retryCount}):`, error);
-                if (retryCount < maxRetries) {
-                    tryFallbackVideoDetails(videoUrl, retryCount);
-                } else {
-                    alert('Error loading video after retries. Please try a VPN or another video.');
-                    showSearchPage();
-                }
+                console.error(error);
+                alert('An error occurred. Please try again later.');
             } finally {
                 loader.style.display = 'none';
             }
         }
 
-        async function tryFallbackVideoDetails(videoUrl, retryCount) {
-            const fallbacks = [
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://xyz-rest-api.vercel.app/download/xnxx?apikey=xyz-key_1fzgS7F28d&url=${encodeURIComponent(videoUrl)}`)}`,
-                `https://cors-anywhere.herokuapp.com/https://xyz-rest-api.vercel.app/download/xnxx?apikey=xyz-key_1fzgS7F28d&url=${encodeURIComponent(videoUrl)}`
-            ];
-
-            try {
-                const response = await fetch(fallbacks[retryCount % fallbacks.length]);
-                if (!response.ok) throw new Error(`Fallback download API failed: ${response.status}`);
-                const data = await response.json();
-                console.log(`Fallback download API response (retry ${retryCount + 1}):`, data);
-
-                if (data.status && data.result) {
-                    const { title, info, files } = data.result;
-                    const videoPlayer = document.getElementById('videoPlayer');
-                    videoPlayer.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}`;
-                    videoPlayer.load();
-                    videoPlayer.play().catch(err => console.error(`Fallback play error (retry ${retryCount + 1}):`, err));
-
-                    document.getElementById('videoTitle').textContent = title;
-                    document.getElementById('videoInfo').textContent = info.replace(/\n/g, ' | ');
-
-                    document.getElementById('downloadLinks').innerHTML = `
-                        <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.low)}', 'low_quality.mp4', 0)">Low Quality</button>
-                        <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}', 'high_quality.mp4', 0)">High Quality</button>
-                        <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8', 0)">HLS Stream</button>
-                    `;
-                } else {
-                    alert('Failed to load video data in fallback. Please try another video.');
-                    showSearchPage();
-                }
-            } catch (error) {
-                console.error(`Fallback video load error (retry ${retryCount + 1}):`, error);
-                if (retryCount + 1 < maxRetries) {
-                    tryFallbackVideoDetails(videoUrl, retryCount + 1);
-                } else {
-                    alert('Error loading video after all retries. Please try a VPN or another video.');
-                    showSearchPage();
-                }
-            }
-        }
-
-        function showSearchPage() {
-            const searchPage = document.getElementById('searchPage');
-            const videoDetails = document.getElementById('videoDetails');
-            const videoPlayer = document.getElementById('videoPlayer');
-            videoPlayer.pause();
-            videoPlayer.src = '';
-            videoDetails.style.display = 'none';
-            searchPage.style.display = 'block';
-            const searchResults = document.getElementById('searchResults');
-            searchResults.innerHTML = searchResultsCache.map(item => {
-                const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
-                return `
-                    <div class="video-item" onclick="showVideoDetails('${item.link}', 0)">
-                        <img src="/proxy/image?url=${encodeURIComponent(thumbUrl)}&t=${Date.now()}" alt="${item.title}" onerror="handleImageError(this, '${encodeURIComponent(thumbUrl)}')" onload="if(this.naturalWidth===1) this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
-                        <h3>${item.title}</h3>
-                        <p>${item.info.replace(/\n/g, ' | ')}</p>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        async function startDownload(proxyUrl, fileName, retryCount) {
+        async function startDownload(proxyUrl, fileName) {
             const loader = document.getElementById('loader');
             loader.textContent = 'Downloading via proxy...';
             loader.style.display = 'block';
 
             try {
                 const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error(`Download failed: ${response.status}`);
+                if (!response.ok) throw new Error('Failed to fetch file via proxy');
+
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -623,16 +252,8 @@
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             } catch (error) {
-                console.error(`Download error (retry ${retryCount}):`, error);
-                if (retryCount < maxRetries) {
-                    console.log(`Retrying download (attempt ${retryCount + 1})...`);
-                    const fallbackUrl = proxyUrl.includes('/proxy/download') 
-                        ? `https://api.allorigins.win/raw?url=${encodeURIComponent(new URLSearchParams(proxyUrl.split('?')[1]).get('url'))}`
-                        : `/proxy/download?url=${encodeURIComponent(proxyUrl.split('url=')[1])}`;
-                    startDownload(fallbackUrl, fileName, retryCount + 1);
-                } else {
-                    alert('Download failed after retries. Try using a VPN or another file.');
-                }
+                console.error(error);
+                alert('Download failed. Try using a VPN or check the URL.');
             } finally {
                 loader.style.display = 'none';
                 loader.textContent = 'Loading...';
