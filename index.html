@@ -263,9 +263,7 @@
         <div id="searchPage">
             <h1><i class="fa-solid fa-download icon-3d"></i> XNXX Downloader</h1>
             <div class="input-group">
-                <input type="text" id="searchInput" placeholder="Search for videos (！
-
-e.g., blow job)">
+                <input type="text" id="searchInput" placeholder="Search for videos (e.g., blow job)">
                 <button class="search-btn" id="searchBtn"><i class="fa-solid fa-search icon-3d"></i> Search</button>
             </div>
             <div class="loader" id="loader">Loading...</div>
@@ -289,7 +287,7 @@ e.g., blow job)">
         </div>
     </div>
     <script>
-        let searchResultsCache = []; // Cache hasil search
+        let searchResultsCache = [];
         let lastClickTime = 0;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -315,13 +313,14 @@ e.g., blow job)">
                     if (clickX < rect.width / 3) {
                         videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5);
                     } else if (clickX > (rect.width * 2) / 3) {
-                        videoPlayer.currentTime = videoPlayer.currentTime + 5;
+                        videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 5);
                     } else {
                         togglePlayPause();
                     }
                 } else {
                     // Single click
                     videoControls.classList.toggle('show');
+                    setTimeout(() => videoControls.classList.remove('show'), 3000);
                 }
                 lastClickTime = currentTime;
             });
@@ -331,7 +330,7 @@ e.g., blow job)">
                 videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5);
             });
             forwardBtn.addEventListener('click', () => {
-                videoPlayer.currentTime = videoPlayer.currentTime + 5;
+                videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 5);
             });
 
             videoPlayer.addEventListener('play', () => {
@@ -365,9 +364,11 @@ e.g., blow job)">
             searchResults.innerHTML = '';
 
             try {
-                const apiUrl = `https://xyz-rest-api.vercel.app/search/xnxx?apikey=xyz-key_1fzgS7F28d&q=${encodeURIComponent(query)}`;
-                const proxyApiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
-                const response = await fetch(proxyApiUrl);
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
                 if (!response.ok) throw new Error('Search API request failed');
                 const data = await response.json();
                 console.log('Search API response:', data);
@@ -378,7 +379,7 @@ e.g., blow job)">
                         const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
                         return `
                             <div class="video-item" onclick="showVideoDetails('${item.link}')">
-                                <img src="https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&w=250&h=140&fit=cover&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
+                                <img src="/proxy/image?url=${encodeURIComponent(thumbUrl)}&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
                                 <h3>${item.title}</h3>
                                 <p>${item.info.replace(/\n/g, ' | ')}</p>
                             </div>
@@ -407,12 +408,14 @@ e.g., blow job)">
             loader.style.display = 'block';
             searchPage.style.display = 'none';
             videoDetails.style.display = 'block';
-            videoPlayer.src = ''; // Reset video source
+            videoPlayer.src = '';
 
             try {
-                const apiUrl = `https://xyz-rest-api.vercel.app/download/xnxx?apikey=xyz-key_1fzgS7F28d&url=${encodeURIComponent(videoUrl)}`;
-                const proxyApiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
-                const response = await fetch(proxyApiUrl);
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: videoUrl })
+                });
                 if (!response.ok) throw new Error('Download API request failed');
                 const data = await response.json();
                 console.log('Download API response:', data);
@@ -421,8 +424,7 @@ e.g., blow job)">
                     const { title, info, files } = data.result;
 
                     // Set video source with proxy
-                    const videoSrc = `https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}`;
-                    videoPlayer.src = videoSrc;
+                    videoPlayer.src = `/proxy/download?url=${encodeURIComponent(files.high)}`;
                     videoPlayer.load();
                     videoPlayer.play().catch(err => console.error('Video play error:', err));
 
@@ -430,9 +432,9 @@ e.g., blow job)">
                     videoInfo.textContent = info.replace(/\n/g, ' | ');
 
                     downloadLinks.innerHTML = `
-                        <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.low)}', 'low_quality.mp4')">Low Quality</button>
-                        <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}', 'high_quality.mp4')">High Quality</button>
-                        <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8')">HLS Stream</button>
+                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.low)}', 'low_quality.mp4')">Low Quality</button>
+                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.high)}', 'high_quality.mp4')">High Quality</button>
+                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8')">HLS Stream</button>
                     `;
                 } else {
                     alert('Failed to load video data. Please try another video.');
@@ -447,13 +449,12 @@ e.g., blow job)">
             }
         }
 
-        function-squared
-
         function showSearchPage() {
             const searchPage = document.getElementById('searchPage');
             const videoDetails = document.getElementById('videoDetails');
             const videoPlayer = document.getElementById('videoPlayer');
             videoPlayer.pause();
+            videoPlayer.src = '';
             videoDetails.style.display = 'none';
             searchPage.style.display = 'block';
             const searchResults = document.getElementById('searchResults');
@@ -461,7 +462,7 @@ e.g., blow job)">
                 const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
                 return `
                     <div class="video-item" onclick="showVideoDetails('${item.link}')">
-                        <img src="https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&w=250&h=140&fit=cover&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
+                        <img src="/proxy/image?url=${encodeURIComponent(thumbUrl)}&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
                         <h3>${item.title}</h3>
                         <p>${item.info.replace(/\n/g, ' | ')}</p>
                     </div>
