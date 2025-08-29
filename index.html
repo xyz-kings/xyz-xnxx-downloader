@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XNXX Downloader</title>
+    <title>XNXX Downloader Overpowered</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -261,7 +261,7 @@
 <body>
     <div class="container">
         <div id="searchPage">
-            <h1><i class="fa-solid fa-download icon-3d"></i> XNXX Downloader</h1>
+            <h1><i class="fa-solid fa-download icon-3d"></i> XNXX Downloader Overpowered</h1>
             <div class="input-group">
                 <input type="text" id="searchInput" placeholder="Search for videos (e.g., blow job)">
                 <button class="search-btn" id="searchBtn"><i class="fa-solid fa-search icon-3d"></i> Search</button>
@@ -274,7 +274,7 @@
                 <button class="back-btn" id="backBtn"><i class="fa-solid fa-arrow-left icon-3d"></i> Back</button>
             </div>
             <div class="video-player">
-                <video id="videoPlayer"></video>
+                <video id="videoPlayer" preload="auto"></video>
                 <div class="video-controls" id="videoControls">
                     <button class="control-btn" id="rewindBtn"><i class="fa-solid fa-backward"></i></button>
                     <button class="control-btn" id="playPauseBtn"><i class="fa-solid fa-play"></i></button>
@@ -289,6 +289,7 @@
     <script>
         let searchResultsCache = [];
         let lastClickTime = 0;
+        const maxRetries = 2;
 
         document.addEventListener('DOMContentLoaded', () => {
             const searchBtn = document.getElementById('searchBtn');
@@ -299,7 +300,7 @@
             const rewindBtn = document.getElementById('rewindBtn');
             const forwardBtn = document.getElementById('forwardBtn');
 
-            searchBtn.addEventListener('click', searchVideos);
+            searchBtn.addEventListener('click', () => searchVideos(0));
             backBtn.addEventListener('click', showSearchPage);
 
             // Custom video controls
@@ -342,8 +343,11 @@
 
             videoPlayer.addEventListener('error', () => {
                 console.error('Video error:', videoPlayer.error);
-                alert('Failed to load video. Trying fallback...');
-                tryFallbackVideo();
+                tryFallbackVideo(0);
+            });
+
+            videoPlayer.addEventListener('loadedmetadata', () => {
+                console.log('Video loaded:', videoPlayer.src);
             });
 
             function togglePlayPause() {
@@ -359,19 +363,26 @@
                 }
             }
 
-            function tryFallbackVideo() {
+            async function tryFallbackVideo(retryCount) {
+                if (retryCount >= maxRetries) {
+                    alert('Failed to load video after retries. Please try another video.');
+                    showSearchPage();
+                    return;
+                }
                 const currentSrc = videoPlayer.src;
                 if (currentSrc.includes('/proxy/download')) {
-                    // Coba fallback ke api.allorigins.win
                     const url = new URLSearchParams(currentSrc.split('?')[1]).get('url');
                     videoPlayer.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
                     videoPlayer.load();
-                    videoPlayer.play().catch(err => console.error('Fallback play error:', err));
+                    videoPlayer.play().catch(err => {
+                        console.error(`Fallback play error (retry ${retryCount + 1}):`, err);
+                        tryFallbackVideo(retryCount + 1);
+                    });
                 }
             }
         });
 
-        async function searchVideos() {
+        async function searchVideos(retryCount) {
             const query = document.getElementById('searchInput').value.trim();
             const searchResults = document.getElementById('searchResults');
             const loader = document.getElementById('loader');
@@ -389,9 +400,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query })
                 });
-                if (!response.ok) {
-                    throw new Error(`Search API request failed: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Search API request failed: ${response.status}`);
                 const data = await response.json();
                 console.log('Search API response:', data);
 
@@ -400,8 +409,8 @@
                     searchResults.innerHTML = data.result.map(item => {
                         const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
                         return `
-                            <div class="video-item" onclick="showVideoDetails('${item.link}')">
-                                <img src="/proxy/image?url=${encodeURIComponent(thumbUrl)}&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&w=250&h=140&fit=cover&t=${Date.now()}'" onload="if(this.naturalWidth===1) this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
+                            <div class="video-item" onclick="showVideoDetails('${item.link}', 0)">
+                                <img src="/proxy/image?url=${encodeURIComponent(thumbUrl)}&t=${Date.now()}" alt="${item.title}" onerror="handleImageError(this, '${encodeURIComponent(thumbUrl)}')" onload="if(this.naturalWidth===1) this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
                                 <h3>${item.title}</h3>
                                 <p>${item.info.replace(/\n/g, ' | ')}</p>
                             </div>
@@ -411,41 +420,69 @@
                     searchResults.innerHTML = '<p>No results found. Try a different query.</p>';
                 }
             } catch (error) {
-                console.error('Search error:', error);
-                // Fallback ke api.allorigins.win
-                try {
-                    const apiUrl = `https://xyz-rest-api.vercel.app/search/xnxx?apikey=xyz-key_1fzgS7F28d&q=${encodeURIComponent(query)}`;
-                    const proxyApiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
-                    const response = await fetch(proxyApiUrl);
-                    if (!response.ok) throw new Error('Fallback search API failed');
-                    const data = await response.json();
-                    console.log('Fallback search API response:', data);
-
-                    if (data.status && data.result && data.result.length > 0) {
-                        searchResultsCache = data.result;
-                        searchResults.innerHTML = data.result.map(item => {
-                            const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
-                            return `
-                                <div class="video-item" onclick="showVideoDetails('${item.link}')">
-                                    <img src="https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&w=250&h=140&fit=cover&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
-                                    <h3>${item.title}</h3>
-                                    <p>${item.info.replace(/\n/g, ' | ')}</p>
-                                </div>
-                            `;
-                        }).join('');
-                    } else {
-                        searchResults.innerHTML = '<p>No results found in fallback. Try a different query.</p>';
-                    }
-                } catch (fallbackError) {
-                    console.error('Fallback search error:', fallbackError);
-                    alert('Error fetching search results. Please check your connection or try a VPN.');
+                console.error(`Search error (retry ${retryCount}):`, error);
+                if (retryCount < maxRetries) {
+                    console.log(`Retrying search with fallback (attempt ${retryCount + 1})...`);
+                    tryFallbackSearch(query, retryCount);
+                } else {
+                    alert('Error fetching search results after retries. Please check your connection or try a VPN.');
                 }
             } finally {
                 loader.style.display = 'none';
             }
         }
 
-        async function showVideoDetails(videoUrl) {
+        async function tryFallbackSearch(query, retryCount) {
+            const loader = document.getElementById('loader');
+            const searchResults = document.getElementById('searchResults');
+            const fallbacks = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://xyz-rest-api.vercel.app/search/xnxx?apikey=xyz-key_1fzgS7F28d&q=${encodeURIComponent(query)}`)}`,
+                `https://cors-anywhere.herokuapp.com/https://xyz-rest-api.vercel.app/search/xnxx?apikey=xyz-key_1fzgS7F28d&q=${encodeURIComponent(query)}`
+            ];
+
+            try {
+                const response = await fetch(fallbacks[retryCount % fallbacks.length]);
+                if (!response.ok) throw new Error(`Fallback search API failed: ${response.status}`);
+                const data = await response.json();
+                console.log(`Fallback search API response (retry ${retryCount + 1}):`, data);
+
+                if (data.status && data.result && data.result.length > 0) {
+                    searchResultsCache = data.result;
+                    searchResults.innerHTML = data.result.map(item => {
+                        const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
+                        return `
+                            <div class="video-item" onclick="showVideoDetails('${item.link}', 0)">
+                                <img src="https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&w=250&h=140&fit=cover&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
+                                <h3>${item.title}</h3>
+                                <p>${item.info.replace(/\n/g, ' | ')}</p>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    searchResults.innerHTML = '<p>No results found in fallback. Try a different query.</p>';
+                }
+            } catch (error) {
+                console.error(`Fallback search error (retry ${retryCount + 1}):`, error);
+                if (retryCount + 1 < maxRetries) {
+                    tryFallbackSearch(query, retryCount + 1);
+                } else {
+                    alert('Error fetching search results after all retries. Please try a VPN or different query.');
+                }
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        function handleImageError(img, thumbUrl) {
+            const fallbacks = [
+                `https://images.weserv.nl/?url=${thumbUrl}&w=250&h=140&fit=cover&t=${Date.now()}`,
+                'https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'
+            ];
+            img.onerror = null;
+            img.src = fallbacks.shift() || fallbacks[0];
+        }
+
+        async function showVideoDetails(videoUrl, retryCount) {
             const searchPage = document.getElementById('searchPage');
             const videoDetails = document.getElementById('videoDetails');
             const videoPlayer = document.getElementById('videoPlayer');
@@ -477,57 +514,73 @@
                     videoPlayer.load();
                     videoPlayer.play().catch(err => {
                         console.error('Video play error:', err);
-                        tryFallbackVideo();
+                        tryFallbackVideo(retryCount + 1);
                     });
 
                     videoTitle.textContent = title;
                     videoInfo.textContent = info.replace(/\n/g, ' | ');
 
                     downloadLinks.innerHTML = `
-                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.low)}', 'low_quality.mp4')">Low Quality</button>
-                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.high)}', 'high_quality.mp4')">High Quality</button>
-                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8')">HLS Stream</button>
+                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.low)}', 'low_quality.mp4', 0)">Low Quality</button>
+                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.high)}', 'high_quality.mp4', 0)">High Quality</button>
+                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8', 0)">HLS Stream</button>
                     `;
                 } else {
                     alert('Failed to load video data. Please try another video.');
                     showSearchPage();
                 }
             } catch (error) {
-                console.error('Video load error:', error);
-                // Fallback ke api.allorigins.win
-                try {
-                    const apiUrl = `https://xyz-rest-api.vercel.app/download/xnxx?apikey=xyz-key_1fzgS7F28d&url=${encodeURIComponent(videoUrl)}`;
-                    const proxyApiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
-                    const response = await fetch(proxyApiUrl);
-                    if (!response.ok) throw new Error('Fallback download API failed');
-                    const data = await response.json();
-                    console.log('Fallback download API response:', data);
-
-                    if (data.status && data.result) {
-                        const { title, info, files } = data.result;
-                        videoPlayer.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}`;
-                        videoPlayer.load();
-                        videoPlayer.play().catch(err => console.error('Fallback play error:', err));
-
-                        videoTitle.textContent = title;
-                        videoInfo.textContent = info.replace(/\n/g, ' | ');
-
-                        downloadLinks.innerHTML = `
-                            <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.low)}', 'low_quality.mp4')">Low Quality</button>
-                            <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}', 'high_quality.mp4')">High Quality</button>
-                            <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8')">HLS Stream</button>
-                        `;
-                    } else {
-                        alert('Failed to load video data in fallback. Please try another video.');
-                        showSearchPage();
-                    }
-                } catch (fallbackError) {
-                    console.error('Fallback video load error:', fallbackError);
-                    alert('Error loading video. Please check your connection or try a VPN.');
+                console.error(`Video load error (retry ${retryCount}):`, error);
+                if (retryCount < maxRetries) {
+                    tryFallbackVideoDetails(videoUrl, retryCount);
+                } else {
+                    alert('Error loading video after retries. Please try a VPN or another video.');
                     showSearchPage();
                 }
             } finally {
                 loader.style.display = 'none';
+            }
+        }
+
+        async function tryFallbackVideoDetails(videoUrl, retryCount) {
+            const fallbacks = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://xyz-rest-api.vercel.app/download/xnxx?apikey=xyz-key_1fzgS7F28d&url=${encodeURIComponent(videoUrl)}`)}`,
+                `https://cors-anywhere.herokuapp.com/https://xyz-rest-api.vercel.app/download/xnxx?apikey=xyz-key_1fzgS7F28d&url=${encodeURIComponent(videoUrl)}`
+            ];
+
+            try {
+                const response = await fetch(fallbacks[retryCount % fallbacks.length]);
+                if (!response.ok) throw new Error(`Fallback download API failed: ${response.status}`);
+                const data = await response.json();
+                console.log(`Fallback download API response (retry ${retryCount + 1}):`, data);
+
+                if (data.status && data.result) {
+                    const { title, info, files } = data.result;
+                    const videoPlayer = document.getElementById('videoPlayer');
+                    videoPlayer.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}`;
+                    videoPlayer.load();
+                    videoPlayer.play().catch(err => console.error(`Fallback play error (retry ${retryCount + 1}):`, err));
+
+                    document.getElementById('videoTitle').textContent = title;
+                    document.getElementById('videoInfo').textContent = info.replace(/\n/g, ' | ');
+
+                    document.getElementById('downloadLinks').innerHTML = `
+                        <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.low)}', 'low_quality.mp4', 0)">Low Quality</button>
+                        <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}', 'high_quality.mp4', 0)">High Quality</button>
+                        <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8', 0)">HLS Stream</button>
+                    `;
+                } else {
+                    alert('Failed to load video data in fallback. Please try another video.');
+                    showSearchPage();
+                }
+            } catch (error) {
+                console.error(`Fallback video load error (retry ${retryCount + 1}):`, error);
+                if (retryCount + 1 < maxRetries) {
+                    tryFallbackVideoDetails(videoUrl, retryCount + 1);
+                } else {
+                    alert('Error loading video after all retries. Please try a VPN or another video.');
+                    showSearchPage();
+                }
             }
         }
 
@@ -543,8 +596,8 @@
             searchResults.innerHTML = searchResultsCache.map(item => {
                 const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
                 return `
-                    <div class="video-item" onclick="showVideoDetails('${item.link}')">
-                        <img src="/proxy/image?url=${encodeURIComponent(thumbUrl)}&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&w=250&h=140&fit=cover&t=${Date.now()}'" onload="if(this.naturalWidth===1) this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
+                    <div class="video-item" onclick="showVideoDetails('${item.link}', 0)">
+                        <img src="/proxy/image?url=${encodeURIComponent(thumbUrl)}&t=${Date.now()}" alt="${item.title}" onerror="handleImageError(this, '${encodeURIComponent(thumbUrl)}')" onload="if(this.naturalWidth===1) this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
                         <h3>${item.title}</h3>
                         <p>${item.info.replace(/\n/g, ' | ')}</p>
                     </div>
@@ -552,14 +605,14 @@
             }).join('');
         }
 
-        async function startDownload(proxyUrl, fileName) {
+        async function startDownload(proxyUrl, fileName, retryCount) {
             const loader = document.getElementById('loader');
             loader.textContent = 'Downloading via proxy...';
             loader.style.display = 'block';
 
             try {
                 const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error('Failed to fetch file via proxy');
+                if (!response.ok) throw new Error(`Download failed: ${response.status}`);
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -570,8 +623,16 @@
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             } catch (error) {
-                console.error('Download error:', error);
-                alert('Download failed. Try using a VPN or another file.');
+                console.error(`Download error (retry ${retryCount}):`, error);
+                if (retryCount < maxRetries) {
+                    console.log(`Retrying download (attempt ${retryCount + 1})...`);
+                    const fallbackUrl = proxyUrl.includes('/proxy/download') 
+                        ? `https://api.allorigins.win/raw?url=${encodeURIComponent(new URLSearchParams(proxyUrl.split('?')[1]).get('url'))}`
+                        : `/proxy/download?url=${encodeURIComponent(proxyUrl.split('url=')[1])}`;
+                    startDownload(fallbackUrl, fileName, retryCount + 1);
+                } else {
+                    alert('Download failed after retries. Try using a VPN or another file.');
+                }
             } finally {
                 loader.style.display = 'none';
                 loader.textContent = 'Loading...';
