@@ -313,7 +313,7 @@
                     if (clickX < rect.width / 3) {
                         videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5);
                     } else if (clickX > (rect.width * 2) / 3) {
-                        videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 5);
+                        videoPlayer.currentTime = Math.min(videoPlayer.duration || Infinity, videoPlayer.currentTime + 5);
                     } else {
                         togglePlayPause();
                     }
@@ -330,7 +330,7 @@
                 videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5);
             });
             forwardBtn.addEventListener('click', () => {
-                videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 5);
+                videoPlayer.currentTime = Math.min(videoPlayer.duration || Infinity, videoPlayer.currentTime + 5);
             });
 
             videoPlayer.addEventListener('play', () => {
@@ -340,13 +340,33 @@
                 playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
             });
 
+            videoPlayer.addEventListener('error', () => {
+                console.error('Video error:', videoPlayer.error);
+                alert('Failed to load video. Trying fallback...');
+                tryFallbackVideo();
+            });
+
             function togglePlayPause() {
                 if (videoPlayer.paused) {
-                    videoPlayer.play().catch(err => console.error('Play error:', err));
+                    videoPlayer.play().catch(err => {
+                        console.error('Play error:', err);
+                        alert('Cannot play video. Try another video or use a VPN.');
+                    });
                     playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
                 } else {
                     videoPlayer.pause();
                     playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                }
+            }
+
+            function tryFallbackVideo() {
+                const currentSrc = videoPlayer.src;
+                if (currentSrc.includes('/proxy/download')) {
+                    // Coba fallback ke api.allorigins.win
+                    const url = new URLSearchParams(currentSrc.split('?')[1]).get('url');
+                    videoPlayer.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+                    videoPlayer.load();
+                    videoPlayer.play().catch(err => console.error('Fallback play error:', err));
                 }
             }
         });
@@ -369,7 +389,9 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query })
                 });
-                if (!response.ok) throw new Error('Search API request failed');
+                if (!response.ok) {
+                    throw new Error(`Search API request failed: ${response.status}`);
+                }
                 const data = await response.json();
                 console.log('Search API response:', data);
 
@@ -379,7 +401,7 @@
                         const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
                         return `
                             <div class="video-item" onclick="showVideoDetails('${item.link}')">
-                                <img src="/proxy/image?url=${encodeURIComponent(thumbUrl)}&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
+                                <img src="/proxy/image?url=${encodeURIComponent(thumbUrl)}&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&w=250&h=140&fit=cover&t=${Date.now()}'" onload="if(this.naturalWidth===1) this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
                                 <h3>${item.title}</h3>
                                 <p>${item.info.replace(/\n/g, ' | ')}</p>
                             </div>
@@ -390,7 +412,34 @@
                 }
             } catch (error) {
                 console.error('Search error:', error);
-                alert('Error fetching search results. Please try again.');
+                // Fallback ke api.allorigins.win
+                try {
+                    const apiUrl = `https://xyz-rest-api.vercel.app/search/xnxx?apikey=xyz-key_1fzgS7F28d&q=${encodeURIComponent(query)}`;
+                    const proxyApiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+                    const response = await fetch(proxyApiUrl);
+                    if (!response.ok) throw new Error('Fallback search API failed');
+                    const data = await response.json();
+                    console.log('Fallback search API response:', data);
+
+                    if (data.status && data.result && data.result.length > 0) {
+                        searchResultsCache = data.result;
+                        searchResults.innerHTML = data.result.map(item => {
+                            const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
+                            return `
+                                <div class="video-item" onclick="showVideoDetails('${item.link}')">
+                                    <img src="https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&w=250&h=140&fit=cover&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
+                                    <h3>${item.title}</h3>
+                                    <p>${item.info.replace(/\n/g, ' | ')}</p>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        searchResults.innerHTML = '<p>No results found in fallback. Try a different query.</p>';
+                    }
+                } catch (fallbackError) {
+                    console.error('Fallback search error:', fallbackError);
+                    alert('Error fetching search results. Please check your connection or try a VPN.');
+                }
             } finally {
                 loader.style.display = 'none';
             }
@@ -416,7 +465,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: videoUrl })
                 });
-                if (!response.ok) throw new Error('Download API request failed');
+                if (!response.ok) throw new Error(`Download API request failed: ${response.status}`);
                 const data = await response.json();
                 console.log('Download API response:', data);
 
@@ -426,7 +475,10 @@
                     // Set video source with proxy
                     videoPlayer.src = `/proxy/download?url=${encodeURIComponent(files.high)}`;
                     videoPlayer.load();
-                    videoPlayer.play().catch(err => console.error('Video play error:', err));
+                    videoPlayer.play().catch(err => {
+                        console.error('Video play error:', err);
+                        tryFallbackVideo();
+                    });
 
                     videoTitle.textContent = title;
                     videoInfo.textContent = info.replace(/\n/g, ' | ');
@@ -442,8 +494,38 @@
                 }
             } catch (error) {
                 console.error('Video load error:', error);
-                alert('Error loading video. Please try again.');
-                showSearchPage();
+                // Fallback ke api.allorigins.win
+                try {
+                    const apiUrl = `https://xyz-rest-api.vercel.app/download/xnxx?apikey=xyz-key_1fzgS7F28d&url=${encodeURIComponent(videoUrl)}`;
+                    const proxyApiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+                    const response = await fetch(proxyApiUrl);
+                    if (!response.ok) throw new Error('Fallback download API failed');
+                    const data = await response.json();
+                    console.log('Fallback download API response:', data);
+
+                    if (data.status && data.result) {
+                        const { title, info, files } = data.result;
+                        videoPlayer.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}`;
+                        videoPlayer.load();
+                        videoPlayer.play().catch(err => console.error('Fallback play error:', err));
+
+                        videoTitle.textContent = title;
+                        videoInfo.textContent = info.replace(/\n/g, ' | ');
+
+                        downloadLinks.innerHTML = `
+                            <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.low)}', 'low_quality.mp4')">Low Quality</button>
+                            <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}', 'high_quality.mp4')">High Quality</button>
+                            <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8')">HLS Stream</button>
+                        `;
+                    } else {
+                        alert('Failed to load video data in fallback. Please try another video.');
+                        showSearchPage();
+                    }
+                } catch (fallbackError) {
+                    console.error('Fallback video load error:', fallbackError);
+                    alert('Error loading video. Please check your connection or try a VPN.');
+                    showSearchPage();
+                }
             } finally {
                 loader.style.display = 'none';
             }
@@ -462,7 +544,7 @@
                 const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
                 return `
                     <div class="video-item" onclick="showVideoDetails('${item.link}')">
-                        <img src="/proxy/image?url=${encodeURIComponent(thumbUrl)}&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
+                        <img src="/proxy/image?url=${encodeURIComponent(thumbUrl)}&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&w=250&h=140&fit=cover&t=${Date.now()}'" onload="if(this.naturalWidth===1) this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
                         <h3>${item.title}</h3>
                         <p>${item.info.replace(/\n/g, ' | ')}</p>
                     </div>
