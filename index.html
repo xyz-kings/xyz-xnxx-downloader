@@ -37,7 +37,7 @@
 
         .input-group {
             display: flex;
-            gap: 10px;
+            gap: 0;
             margin-bottom: 2rem;
             justify-content: center;
         }
@@ -60,7 +60,7 @@
         }
 
         .search-btn {
-            padding: 1rem;
+            padding: 1rem 1.5rem;
             border: none;
             border-radius: 0 10px 10px 0;
             background: linear-gradient(45deg, #ff4b4b, #ff7878);
@@ -70,7 +70,6 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 0.5rem;
         }
 
@@ -115,6 +114,9 @@
         .video-item h3 {
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .video-item p {
@@ -158,6 +160,7 @@
         .video-player video {
             width: 100%;
             border-radius: 10px;
+            background: #000;
         }
 
         .video-controls {
@@ -170,14 +173,16 @@
             align-items: center;
             justify-content: center;
             gap: 2rem;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             opacity: 0;
             transition: opacity 0.3s ease;
             border-radius: 10px;
+            pointer-events: none;
         }
 
         .video-controls.show {
             opacity: 1;
+            pointer-events: auto;
         }
 
         .control-btn {
@@ -191,6 +196,7 @@
             justify-content: center;
             cursor: pointer;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            pointer-events: auto;
         }
 
         .control-btn:hover {
@@ -235,6 +241,7 @@
 
             .input-group {
                 flex-direction: column;
+                gap: 10px;
             }
 
             .search-btn {
@@ -244,6 +251,10 @@
             input[type="text"] {
                 border-radius: 10px;
             }
+
+            .video-player {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -252,7 +263,9 @@
         <div id="searchPage">
             <h1><i class="fa-solid fa-download icon-3d"></i> XNXX Downloader</h1>
             <div class="input-group">
-                <input type="text" id="searchInput" placeholder="Search for videos (e.g., blow job)">
+                <input type="text" id="searchInput" placeholder="Search for videos (！
+
+e.g., blow job)">
                 <button class="search-btn" id="searchBtn"><i class="fa-solid fa-search icon-3d"></i> Search</button>
             </div>
             <div class="loader" id="loader">Loading...</div>
@@ -263,7 +276,7 @@
                 <button class="back-btn" id="backBtn"><i class="fa-solid fa-arrow-left icon-3d"></i> Back</button>
             </div>
             <div class="video-player">
-                <video id="videoPlayer" controls></video>
+                <video id="videoPlayer"></video>
                 <div class="video-controls" id="videoControls">
                     <button class="control-btn" id="rewindBtn"><i class="fa-solid fa-backward"></i></button>
                     <button class="control-btn" id="playPauseBtn"><i class="fa-solid fa-play"></i></button>
@@ -276,7 +289,8 @@
         </div>
     </div>
     <script>
-        let searchResultsCache = []; // Cache hasil search agar tidak hilang saat kembali
+        let searchResultsCache = []; // Cache hasil search
+        let lastClickTime = 0;
 
         document.addEventListener('DOMContentLoaded', () => {
             const searchBtn = document.getElementById('searchBtn');
@@ -291,31 +305,25 @@
             backBtn.addEventListener('click', showSearchPage);
 
             // Custom video controls
-            let clickTimeout = null;
             videoPlayer.addEventListener('click', (e) => {
-                if (clickTimeout) {
-                    clearTimeout(clickTimeout);
-                    clickTimeout = null;
-                    // Double-click handling
-                    const rect = videoPlayer.getBoundingClientRect();
-                    const clickX = e.clientX - rect.left;
+                const currentTime = Date.now();
+                const rect = videoPlayer.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+
+                if (currentTime - lastClickTime < 300) {
+                    // Double-click
                     if (clickX < rect.width / 3) {
-                        // Kiri: Mundur 5 detik
                         videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5);
                     } else if (clickX > (rect.width * 2) / 3) {
-                        // Kanan: Maju 5 detik
                         videoPlayer.currentTime = videoPlayer.currentTime + 5;
                     } else {
-                        // Tengah: Toggle play/pause
                         togglePlayPause();
                     }
                 } else {
-                    // Single click: Tampilkan controls
-                    clickTimeout = setTimeout(() => {
-                        videoControls.classList.toggle('show');
-                        clickTimeout = null;
-                    }, 300);
+                    // Single click
+                    videoControls.classList.toggle('show');
                 }
+                lastClickTime = currentTime;
             });
 
             playPauseBtn.addEventListener('click', togglePlayPause);
@@ -326,9 +334,16 @@
                 videoPlayer.currentTime = videoPlayer.currentTime + 5;
             });
 
+            videoPlayer.addEventListener('play', () => {
+                playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            });
+            videoPlayer.addEventListener('pause', () => {
+                playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            });
+
             function togglePlayPause() {
                 if (videoPlayer.paused) {
-                    videoPlayer.play();
+                    videoPlayer.play().catch(err => console.error('Play error:', err));
                     playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
                 } else {
                     videoPlayer.pause();
@@ -353,24 +368,28 @@
                 const apiUrl = `https://xyz-rest-api.vercel.app/search/xnxx?apikey=xyz-key_1fzgS7F28d&q=${encodeURIComponent(query)}`;
                 const proxyApiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
                 const response = await fetch(proxyApiUrl);
+                if (!response.ok) throw new Error('Search API request failed');
                 const data = await response.json();
-                console.log(data); // Debug
+                console.log('Search API response:', data);
 
-                if (data.status && data.result) {
-                    searchResultsCache = data.result; // Simpan hasil search
-                    searchResults.innerHTML = data.result.map(item => `
-                        <div class="video-item" onclick="showVideoDetails('${item.link}')">
-                            <img src="https://images.weserv.nl/?url=${encodeURIComponent(item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg')}&w=250&h=140&fit=cover&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
-                            <h3>${item.title}</h3>
-                            <p>${item.info.replace(/\n/g, ' | ')}</p>
-                        </div>
-                    `).join('');
+                if (data.status && data.result && data.result.length > 0) {
+                    searchResultsCache = data.result;
+                    searchResults.innerHTML = data.result.map(item => {
+                        const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
+                        return `
+                            <div class="video-item" onclick="showVideoDetails('${item.link}')">
+                                <img src="https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&w=250&h=140&fit=cover&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
+                                <h3>${item.title}</h3>
+                                <p>${item.info.replace(/\n/g, ' | ')}</p>
+                            </div>
+                        `;
+                    }).join('');
                 } else {
-                    alert('No results found. Try a different query.');
+                    searchResults.innerHTML = '<p>No results found. Try a different query.</p>';
                 }
             } catch (error) {
-                console.error(error);
-                alert('Error fetching search results. Try again later.');
+                console.error('Search error:', error);
+                alert('Error fetching search results. Please try again.');
             } finally {
                 loader.style.display = 'none';
             }
@@ -388,21 +407,24 @@
             loader.style.display = 'block';
             searchPage.style.display = 'none';
             videoDetails.style.display = 'block';
+            videoPlayer.src = ''; // Reset video source
 
             try {
                 const apiUrl = `https://xyz-rest-api.vercel.app/download/xnxx?apikey=xyz-key_1fzgS7F28d&url=${encodeURIComponent(videoUrl)}`;
                 const proxyApiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
                 const response = await fetch(proxyApiUrl);
+                if (!response.ok) throw new Error('Download API request failed');
                 const data = await response.json();
-                console.log(data); // Debug
+                console.log('Download API response:', data);
 
                 if (data.status && data.result) {
                     const { title, info, files } = data.result;
 
-                    // Set video source (high quality)
-                    videoPlayer.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}`;
+                    // Set video source with proxy
+                    const videoSrc = `https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}`;
+                    videoPlayer.src = videoSrc;
                     videoPlayer.load();
-                    videoPlayer.play().catch(() => console.log('Auto-play blocked'));
+                    videoPlayer.play().catch(err => console.error('Video play error:', err));
 
                     videoTitle.textContent = title;
                     videoInfo.textContent = info.replace(/\n/g, ' | ');
@@ -413,15 +435,19 @@
                         <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8')">HLS Stream</button>
                     `;
                 } else {
-                    alert('Failed to fetch video data. Please try another video.');
+                    alert('Failed to load video data. Please try another video.');
+                    showSearchPage();
                 }
             } catch (error) {
-                console.error(error);
-                alert('Error loading video. Try again later.');
+                console.error('Video load error:', error);
+                alert('Error loading video. Please try again.');
+                showSearchPage();
             } finally {
                 loader.style.display = 'none';
             }
         }
+
+        function-squared
 
         function showSearchPage() {
             const searchPage = document.getElementById('searchPage');
@@ -430,15 +456,17 @@
             videoPlayer.pause();
             videoDetails.style.display = 'none';
             searchPage.style.display = 'block';
-            // Hasil search tetap dari cache
             const searchResults = document.getElementById('searchResults');
-            searchResults.innerHTML = searchResultsCache.map(item => `
-                <div class="video-item" onclick="showVideoDetails('${item.link}')">
-                    <img src="https://images.weserv.nl/?url=${encodeURIComponent(item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg')}&w=250&h=140&fit=cover&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
-                    <h3>${item.title}</h3>
-                    <p>${item.info.replace(/\n/g, ' | ')}</p>
-                </div>
-            `).join('');
+            searchResults.innerHTML = searchResultsCache.map(item => {
+                const thumbUrl = item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg';
+                return `
+                    <div class="video-item" onclick="showVideoDetails('${item.link}')">
+                        <img src="https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&w=250&h=140&fit=cover&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
+                        <h3>${item.title}</h3>
+                        <p>${item.info.replace(/\n/g, ' | ')}</p>
+                    </div>
+                `;
+            }).join('');
         }
 
         async function startDownload(proxyUrl, fileName) {
@@ -459,8 +487,8 @@
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             } catch (error) {
-                console.error(error);
-                alert('Download failed. Try using a VPN or check the URL.');
+                console.error('Download error:', error);
+                alert('Download failed. Try using a VPN or another file.');
             } finally {
                 loader.style.display = 'none';
                 loader.textContent = 'Loading...';
