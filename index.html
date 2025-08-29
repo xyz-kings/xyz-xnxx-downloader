@@ -18,20 +18,13 @@
             background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
             color: #ffffff;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             overflow-x: hidden;
         }
 
         .container {
-            background: rgba(0, 0, 0, 0.8);
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            max-width: 600px;
-            width: 90%;
-            backdrop-filter: blur(10px);
         }
 
         h1 {
@@ -45,14 +38,16 @@
         .input-group {
             display: flex;
             gap: 10px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            justify-content: center;
         }
 
         input[type="text"] {
-            flex: 1;
+            width: 100%;
+            max-width: 500px;
             padding: 1rem;
             border: none;
-            border-radius: 10px;
+            border-radius: 10px 0 0 10px;
             background: #333;
             color: #fff;
             font-size: 1rem;
@@ -64,10 +59,10 @@
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
-        button {
+        .search-btn {
             padding: 1rem;
             border: none;
-            border-radius: 10px;
+            border-radius: 0 10px 10px 0;
             background: linear-gradient(45deg, #ff4b4b, #ff7878);
             color: #fff;
             font-size: 1rem;
@@ -79,8 +74,8 @@
             gap: 0.5rem;
         }
 
-        button:hover {
-            transform: translateY(-5px);
+        .search-btn:hover {
+            transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(255, 75, 75, 0.5);
         }
 
@@ -89,29 +84,123 @@
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
-        #result {
+        .search-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
             margin-top: 2rem;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            display: none;
         }
 
-        #result img {
-            max-width: 100%;
+        .video-item {
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .video-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 75, 75, 0.3);
+        }
+
+        .video-item img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-item h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-item p {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .video-details {
+            display: none;
+            padding: 1rem;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
             margin-bottom: 1rem;
         }
 
-        #result h2 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
+        .back-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #ff4b4b, #ff7878);
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        #result p {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-            color: #ccc;
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 75, 75, 0.5);
+        }
+
+        .video-player {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 1rem;
+        }
+
+        .video-player video {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .video-controls {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .video-controls.show {
+            opacity: 1;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .control-btn i {
+            font-size: 1.5rem;
+            color: #fff;
         }
 
         .download-links button {
@@ -120,11 +209,10 @@
             margin: 0.5rem;
             background: linear-gradient(45deg, #ff4b4b, #ff7878);
             color: #fff;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: none;
+            border-radius: 8px;
             cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .download-links button:hover {
@@ -137,7 +225,7 @@
             text-align: center;
             font-size: 1rem;
             color: #fff;
-            margin-top: 1rem;
+            margin: 2rem 0;
         }
 
         @media (max-width: 600px) {
@@ -149,88 +237,208 @@
                 flex-direction: column;
             }
 
-            button {
-                width: 100%;
+            .search-btn {
+                border-radius: 10px;
+            }
+
+            input[type="text"] {
+                border-radius: 10px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1><i class="fa-solid fa-download icon-3d"></i> XNXX Downloader</h1>
-        <div class="input-group">
-            <input type="text" id="urlInput" placeholder="Paste XNXX video URL here...">
-            <button id="downloadBtn"><i class="fa-solid fa-cloud-arrow-down icon-3d"></i> Download</button>
+        <div id="searchPage">
+            <h1><i class="fa-solid fa-download icon-3d"></i> XNXX Downloader</h1>
+            <div class="input-group">
+                <input type="text" id="searchInput" placeholder="Search for videos (e.g., blow job)">
+                <button class="search-btn" id="searchBtn"><i class="fa-solid fa-search icon-3d"></i> Search</button>
+            </div>
+            <div class="loader" id="loader">Loading...</div>
+            <div class="search-results" id="searchResults"></div>
         </div>
-        <div class="loader" id="loader">Loading...</div>
-        <div id="result">
-            <img id="thumbnail" src="" alt="Video Thumbnail">
-            <h2 id="title"></h2>
-            <p id="info"></p>
+        <div class="video-details" id="videoDetails">
+            <div class="toolbar">
+                <button class="back-btn" id="backBtn"><i class="fa-solid fa-arrow-left icon-3d"></i> Back</button>
+            </div>
+            <div class="video-player">
+                <video id="videoPlayer" controls></video>
+                <div class="video-controls" id="videoControls">
+                    <button class="control-btn" id="rewindBtn"><i class="fa-solid fa-backward"></i></button>
+                    <button class="control-btn" id="playPauseBtn"><i class="fa-solid fa-play"></i></button>
+                    <button class="control-btn" id="forwardBtn"><i class="fa-solid fa-forward"></i></button>
+                </div>
+            </div>
+            <h2 id="videoTitle"></h2>
+            <p id="videoInfo"></p>
             <div class="download-links" id="downloadLinks"></div>
         </div>
     </div>
     <script>
+        let searchResultsCache = []; // Cache hasil search agar tidak hilang saat kembali
+
         document.addEventListener('DOMContentLoaded', () => {
-            const downloadBtn = document.getElementById('downloadBtn');
-            downloadBtn.addEventListener('click', fetchVideo);
+            const searchBtn = document.getElementById('searchBtn');
+            const backBtn = document.getElementById('backBtn');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoControls = document.getElementById('videoControls');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const rewindBtn = document.getElementById('rewindBtn');
+            const forwardBtn = document.getElementById('forwardBtn');
+
+            searchBtn.addEventListener('click', searchVideos);
+            backBtn.addEventListener('click', showSearchPage);
+
+            // Custom video controls
+            let clickTimeout = null;
+            videoPlayer.addEventListener('click', (e) => {
+                if (clickTimeout) {
+                    clearTimeout(clickTimeout);
+                    clickTimeout = null;
+                    // Double-click handling
+                    const rect = videoPlayer.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    if (clickX < rect.width / 3) {
+                        // Kiri: Mundur 5 detik
+                        videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5);
+                    } else if (clickX > (rect.width * 2) / 3) {
+                        // Kanan: Maju 5 detik
+                        videoPlayer.currentTime = videoPlayer.currentTime + 5;
+                    } else {
+                        // Tengah: Toggle play/pause
+                        togglePlayPause();
+                    }
+                } else {
+                    // Single click: Tampilkan controls
+                    clickTimeout = setTimeout(() => {
+                        videoControls.classList.toggle('show');
+                        clickTimeout = null;
+                    }, 300);
+                }
+            });
+
+            playPauseBtn.addEventListener('click', togglePlayPause);
+            rewindBtn.addEventListener('click', () => {
+                videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5);
+            });
+            forwardBtn.addEventListener('click', () => {
+                videoPlayer.currentTime = videoPlayer.currentTime + 5;
+            });
+
+            function togglePlayPause() {
+                if (videoPlayer.paused) {
+                    videoPlayer.play();
+                    playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                } else {
+                    videoPlayer.pause();
+                    playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                }
+            }
         });
 
-        async function fetchVideo() {
-            const urlInput = document.getElementById('urlInput').value;
-            const resultDiv = document.getElementById('result');
+        async function searchVideos() {
+            const query = document.getElementById('searchInput').value.trim();
+            const searchResults = document.getElementById('searchResults');
             const loader = document.getElementById('loader');
-            const thumbnail = document.getElementById('thumbnail');
-            const apiKey = 'xyz-key_1fzgS7F28d';
-            const apiUrl = `https://xyz-rest-api.vercel.app/download/xnxx?apikey=${apiKey}&url=${encodeURIComponent(urlInput)}`;
-
-            if (!urlInput) {
-                alert('Please enter a valid URL');
+            if (!query) {
+                alert('Please enter a search query');
                 return;
             }
 
             loader.style.display = 'block';
-            resultDiv.style.display = 'none';
+            searchResults.innerHTML = '';
 
             try {
-                // Gunakan allorigins.win sebagai proxy server luar untuk API
+                const apiUrl = `https://xyz-rest-api.vercel.app/search/xnxx?apikey=xyz-key_1fzgS7F28d&q=${encodeURIComponent(query)}`;
                 const proxyApiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
                 const response = await fetch(proxyApiUrl);
                 const data = await response.json();
-                console.log(data); // Debug respons API
+                console.log(data); // Debug
 
                 if (data.status && data.result) {
-                    const { title, image, info, files } = data.result;
+                    searchResultsCache = data.result; // Simpan hasil search
+                    searchResults.innerHTML = data.result.map(item => `
+                        <div class="video-item" onclick="showVideoDetails('${item.link}')">
+                            <img src="https://images.weserv.nl/?url=${encodeURIComponent(item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg')}&w=250&h=140&fit=cover&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
+                            <h3>${item.title}</h3>
+                            <p>${item.info.replace(/\n/g, ' | ')}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    alert('No results found. Try a different query.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error fetching search results. Try again later.');
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
 
-                    // Proxy thumbnail melalui images.weserv.nl (server Belanda)
-                    const proxyImageUrl = `https://images.weserv.nl/?url=${encodeURIComponent(image)}&w=400&h=225&fit=cover&t=${Date.now()}`;
-                    thumbnail.src = proxyImageUrl;
-                    thumbnail.onerror = () => {
-                        // Fallback ke thumbnail lain dari respons API
-                        thumbnail.src = files.thumb69 || files.thumb || 'https://via.placeholder.com/400x225?text=Thumbnail+Not+Available';
-                        thumbnail.alt = 'Thumbnail not available';
-                    };
+        async function showVideoDetails(videoUrl) {
+            const searchPage = document.getElementById('searchPage');
+            const videoDetails = document.getElementById('videoDetails');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoTitle = document.getElementById('videoTitle');
+            const videoInfo = document.getElementById('videoInfo');
+            const downloadLinks = document.getElementById('downloadLinks');
+            const loader = document.getElementById('loader');
 
-                    document.getElementById('title').textContent = title;
-                    document.getElementById('info').textContent = info.replace(/\n/g, ' | ');
+            loader.style.display = 'block';
+            searchPage.style.display = 'none';
+            videoDetails.style.display = 'block';
 
-                    const downloadLinks = document.getElementById('downloadLinks');
+            try {
+                const apiUrl = `https://xyz-rest-api.vercel.app/download/xnxx?apikey=xyz-key_1fzgS7F28d&url=${encodeURIComponent(videoUrl)}`;
+                const proxyApiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+                const response = await fetch(proxyApiUrl);
+                const data = await response.json();
+                console.log(data); // Debug
+
+                if (data.status && data.result) {
+                    const { title, info, files } = data.result;
+
+                    // Set video source (high quality)
+                    videoPlayer.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}`;
+                    videoPlayer.load();
+                    videoPlayer.play().catch(() => console.log('Auto-play blocked'));
+
+                    videoTitle.textContent = title;
+                    videoInfo.textContent = info.replace(/\n/g, ' | ');
+
                     downloadLinks.innerHTML = `
                         <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.low)}', 'low_quality.mp4')">Low Quality</button>
                         <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.high)}', 'high_quality.mp4')">High Quality</button>
                         <button onclick="startDownload('https://api.allorigins.win/raw?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8')">HLS Stream</button>
                     `;
-
-                    resultDiv.style.display = 'block';
                 } else {
-                    alert('Failed to fetch video data. Please check the URL.');
+                    alert('Failed to fetch video data. Please try another video.');
                 }
             } catch (error) {
                 console.error(error);
-                alert('An error occurred. Please try again later.');
+                alert('Error loading video. Try again later.');
             } finally {
                 loader.style.display = 'none';
             }
+        }
+
+        function showSearchPage() {
+            const searchPage = document.getElementById('searchPage');
+            const videoDetails = document.getElementById('videoDetails');
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.pause();
+            videoDetails.style.display = 'none';
+            searchPage.style.display = 'block';
+            // Hasil search tetap dari cache
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = searchResultsCache.map(item => `
+                <div class="video-item" onclick="showVideoDetails('${item.link}')">
+                    <img src="https://images.weserv.nl/?url=${encodeURIComponent(item.link.replace('video-', 'thumbs169xnxxll/').replace(/\/[^/]+$/, '') + '/thumb.jpg')}&w=250&h=140&fit=cover&t=${Date.now()}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x140?text=Thumbnail+Not+Available'">
+                    <h3>${item.title}</h3>
+                    <p>${item.info.replace(/\n/g, ' | ')}</p>
+                </div>
+            `).join('');
         }
 
         async function startDownload(proxyUrl, fileName) {
@@ -241,7 +449,6 @@
             try {
                 const response = await fetch(proxyUrl);
                 if (!response.ok) throw new Error('Failed to fetch file via proxy');
-
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
