@@ -119,7 +119,261 @@
             display: inline-block;
             padding: 0.8rem 1.5rem;
             margin: 0.5rem;
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XNXX Downloader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            width: 90%;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            background: #333;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        button {
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
             background: linear-gradient(45deg, #ff4b4b, #ff7878);
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 75, 75, 0.5);
+        }
+
+        .icon-3d {
+            font-size: 1.2rem;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        #result {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            display: none;
+        }
+
+        #result img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        #result h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #result p {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: #ccc;
+        }
+
+        .download-links button {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            margin: 0.5rem;
+            background: linear-gradient(45deg, #ff4b4b, #ff7878);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .download-links button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 75, 75, 0.5);
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            font-size: 1rem;
+            color: #fff;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fa-solid fa-download icon-3d"></i> XNXX Downloader</h1>
+        <div class="input-group">
+            <input type="text" id="urlInput" placeholder="Paste XNXX video URL here...">
+            <button id="downloadBtn"><i class="fa-solid fa-cloud-arrow-down icon-3d"></i> Download</button>
+        </div>
+        <div class="loader" id="loader">Loading...</div>
+        <div id="result">
+            <img id="thumbnail" src="" alt="Video Thumbnail">
+            <h2 id="title"></h2>
+            <p id="info"></p>
+            <div class="download-links" id="downloadLinks"></div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.addEventListener('click', fetchVideo);
+        });
+
+        async function fetchVideo() {
+            const urlInput = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
+            const loader = document.getElementById('loader');
+            const thumbnail = document.getElementById('thumbnail');
+
+            if (!urlInput) {
+                alert('Please enter a valid URL');
+                return;
+            }
+
+            loader.style.display = 'block';
+            resultDiv.style.display = 'none';
+
+            try {
+                // Fetch melalui server proxy endpoint
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: urlInput })
+                });
+                const data = await response.json();
+                console.log(data); // Debug
+
+                if (data.status && data.result) {
+                    const { title, image, info, files } = data.result;
+
+                    // Proxy thumbnail melalui server
+                    thumbnail.src = `/proxy/image?url=${encodeURIComponent(image)}&t=${Date.now()}`;
+                    thumbnail.onerror = () => {
+                        thumbnail.src = 'https://via.placeholder.com/400x225?text=Thumbnail+Not+Available';
+                        thumbnail.alt = 'Thumbnail not available';
+                    };
+
+                    document.getElementById('title').textContent = title;
+                    document.getElementById('info').textContent = info.replace(/\n/g, ' | ');
+
+                    const downloadLinks = document.getElementById('downloadLinks');
+                    downloadLinks.innerHTML = `
+                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.low)}', 'low_quality.mp4')">Low Quality</button>
+                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.high)}', 'high_quality.mp4')">High Quality</button>
+                        <button onclick="startDownload('/proxy/download?url=${encodeURIComponent(files.HLS)}', 'hls_stream.m3u8')">HLS Stream</button>
+                    `;
+
+                    resultDiv.style.display = 'block';
+                } else {
+                    alert('Failed to fetch video data. Please check the URL.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred. Please try again later.');
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        // Fungsi untuk memulai download melalui proxy server
+        function startDownload(proxyUrl, fileName) {
+            const loader = document.getElementById('loader');
+            loader.textContent = 'Downloading...';
+            loader.style.display = 'block';
+
+            // Buat iframe atau link untuk trigger download
+            const a = document.createElement('a');
+            a.href = proxyUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // Sembunyikan loader setelah beberapa detik (asumsi download mulai)
+            setTimeout(() => {
+                loader.style.display = 'none';
+                loader.textContent = 'Loading...';
+            }, 2000); // Adjust jika perlu
+        }
+    </script>
+</body>
+</html>           background: linear-gradient(45deg, #ff4b4b, #ff7878);
             color: #fff;
             text-decoration: none;
             border-radius: 8px;
